@@ -1,0 +1,95 @@
+Course Project Developing Data Products
+Polynomial classifier
+========================================================
+author: Alberto Joven
+date: 2021/02/10
+autosize: true
+
+
+========================================================
+
+This plot shows the results of two tests applied to 118 microchips, indicating in 
+red the microchips that are correct according to quality control and in blue
+those that are defective. 
+
+A polynomial classifier is fitted to the Test 1 and Test2 data.
+
+The degree of the polynomial is selected by the user between the values 1 and 9.
+
+
+Plot with the points obtained by the microchips in Test 1 and  Test 2
+========================================================
+
+```{r, echo = FALSE}
+data <- read.csv("ex2data2.txt", header=FALSE)
+ 
+ X<- as.matrix(data[, c(1,2)])
+ y<- as.factor(data[,3])
+ levels(y) <- c("Deficient", "Correct")
+ 
+ pos <- X[y=="Correct", c(1,2)]
+ neg <- X[y=="Deficient", c(1,2)]
+ X1=X[,1]
+ X2=X[,2]
+ 
+ u= seq(-1, 1.5, length.out=50)
+ v= seq(-1, 1.5, length.out=50)
+ z= matrix(0, nrow=length(u), ncol=length(v))
+ P1= rep(u, each=length(v)); P2= rep(v, length(u))
+ P = cbind(P1, P2)
+
+```
+
+
+```{r, echo =FALSE}
+X <- polym(X, degree=4, raw=TRUE)
+P <- polym(P, degree=4, raw=TRUE)
+     
+mod  = glm(y ~ ., data=data.frame(X), family="binomial")
+     
+z = predict.glm(mod, newdata = data.frame(P), type="response")
+z = matrix(z, length(u), length(v), byrow=TRUE)
+
+```
+
+A level curve shows the points for which the classifier gives a probability equal 
+to the microchip being defective or correct according to a polynomial fit of degree 4. 
+
+```{r, echo =FALSE, fig.align="center"}
+plot(pos, pch=10, col="red", xlab="Microchip Test 1",
+         ylab="'Microchip Test 2",
+         xlim=c(-1, 1.2), ylim=c(-1, 1.2))
+    points(neg, col="blue")
+    contour(x=u, y=v, z=z, levels=c(0.5), add=TRUE)
+    
+```
+
+
+Confussion Matrix
+========================================================
+I add the confusion matrix resulting from fitting a polynomial classifier of degree 4
+
+```{r, echo = FALSE}
+z2 = predict.glm(mod,  type="response")
+     
+     z22 <- factor(levels = c("Deficient", "Correct")) 
+     z22[z2 > 0.5] = "Correct"
+     z22[z2 < 0.5] = "Deficient"
+     
+     t = table(Real=y, Model=z22)
+     t
+     
+```
+
+Try the app
+=========================================================
+You can test the app at the following link:
+
+<http://ajoven10.shinyapps.io/Project_course>
+
+And you can access the R code in the following link:
+
+<https://github.com/ajoven10/project_shiny.git>
+
+
+
